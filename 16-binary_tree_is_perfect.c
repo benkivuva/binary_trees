@@ -1,4 +1,5 @@
 #include "binary_trees.h"
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 /**
  * binary_tree_is_full - Checks if a binary tree is full
