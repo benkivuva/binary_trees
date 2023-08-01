@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 /**
  * struct binary_tree_s - Binary tree node
  *
@@ -34,6 +36,6 @@ void binary_tree_preorder(const binary_tree_t *tree, void (*func)(int));
 void binary_tree_inorder(const binary_tree_t *tree, void (*func)(int));
 void binary_tree_postorder(const binary_tree_t *tree, void (*func)(int));
 size_t binary_tree_height(const binary_tree_t *tree);
-size_t _max(size_t a, size_t b);
+size_t _binary_tree_height(const binary_tree_t *tree);
 
 #endif /* BINARY_TREES_H */

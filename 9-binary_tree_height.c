@@ -1,20 +1,30 @@
 #include "binary_trees.h"
 
 /**
- * binary_tree_height - Measures the height of a binary tree
- * @tree: Pointer to the root node of the tree to measure the height
- *
- * Return: Height of the binary tree, 0 if tree is NULL
+ * _binary_tree_height - helper func for binary_tree_height
+ * @tree: input tree
+ * Return: height of tree
+ */
+size_t _binary_tree_height(const binary_tree_t *tree)
+{
+	size_t a, b;
+
+	if (!tree)
+		return (0);
+
+	a = _binary_tree_height(tree->left);
+	b = _binary_tree_height(tree->right);
+	return (MAX(a, b) + 1);
+}
+
+/**
+ * binary_tree_height - measures the height of a binary tree
+ * @tree: input tree
+ * Return: height of tree
  */
 size_t binary_tree_height(const binary_tree_t *tree)
 {
-	size_t left_height, right_height;
-
-	if (tree == NULL)
+	if (!tree)
 		return (0);
-
-	left_height = binary_tree_height(tree->left);
-	right_height = binary_tree_height(tree->right);
-
-	return (1 + (left_height > right_height ? left_height : right_height));
+	return (_binary_tree_height(tree) - 1);
 }
