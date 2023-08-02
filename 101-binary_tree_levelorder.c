@@ -1,65 +1,80 @@
 #include "binary_trees.h"
 
+size_t _max(size_t a, size_t b);
+void push_nodes(binary_tree_t *tree, int depth, binary_tree_t **arr);
 /**
- * _binary_tree_height - helper function for binary_tree_height
- * @tree: input tree
- * Return: height of tree
- */
-size_t _binary_tree_height(const binary_tree_t *tree)
-{
-	if (!tree)
-		return (0);
-
-	size_t left_height = _binary_tree_height(tree->left);
-	size_t right_height = _binary_tree_height(tree->right);
-
-	return (MAX(left_height, right_height) + 1);
-}
-
-/**
- * binary_tree_height - measures the height of a binary tree
- * @tree: input tree
- * Return: height of tree
- */
-size_t binary_tree_height(const binary_tree_t *tree)
-{
-	if (!tree)
-		return (0);
-
-	return (_binary_tree_height(tree) - 1);
-}
-
-/**
- * print_level - prints a given tree level recursively
- * @tree: pointer to root of tree
- * @func: function to be called on each node
- * @level: the tree depth level to print
- */
-void print_level(const binary_tree_t *tree, void (*func)(int), size_t level)
-{
-	if (!level)
-		func(tree->n);
-	else
-	{
-		print_level(tree->left, func, level - 1);
-		print_level(tree->right, func, level - 1);
-	}
-}
-
-/**
- * binary_tree_levelorder - goes through a binary tree using level-order
- * traversal
- * @tree: pointer to root of tree
- * @func: function to be called on each node
+ * binary_tree_levelorder - level order traverse
+ * @tree: tree to traverse
+ * @func: function to call on node data
  */
 void binary_tree_levelorder(const binary_tree_t *tree, void (*func)(int))
 {
-	size_t height, current_level;
+	int i, j, size = 1, height = binary_tree_height(tree);
+	binary_tree_t **arr = NULL;
 
 	if (!tree || !func)
 		return;
+	for (i = 0; i < height; i++)
+		size *= 2;
+	arr = malloc(sizeof(binary_tree_t *) * size);
+	if (!arr)
+		exit(-1);
+	for (i = 0; i < size; i++)
+		arr[i] = NULL;
+	for (i = 0; i <= height; i++)
+	{
+		push_nodes((binary_tree_t *) tree, i, arr);
+		for (j = 0; arr[j]; j++)
+		{
+			func(arr[j]->n);
+			arr[j] = NULL;
+		}
+	}
+	free(arr);
+}
+/**
+ * push_nodes - put all nodes of depth into array
+ * @tree: root node
+ * @depth: target depth
+ * @arr: array to hold nodes
+ */
+void push_nodes(binary_tree_t *tree, int depth, binary_tree_t **arr)
+{
+	int i;
 
-	height = binary_tree_height(tree);
-	for (current_level = 0; current_level <= height; current_level++)
-		print_level(tree, func, current_level);
+	if (tree && depth == 0)
+	{
+		for (i = 0; arr[i]; i++)
+			;
+		arr[i] = tree;
+	}
+	else if (tree)
+	{
+		push_nodes(tree->left, depth - 1, arr);
+		push_nodes(tree->right, depth - 1, arr);
+	}
+}
+/**
+ * binary_tree_height - height of a tree
+ * @tree: tree
+ *
+ * Return: height of the tree
+ */
+size_t binary_tree_height(const binary_tree_t *tree)
+{
+	if (tree && (tree->left || tree->right))
+		return (1 + _max(binary_tree_height(tree->left),
+					binary_tree_height(tree->right)));
+	return (0);
+}
+/**
+ * _max - find max of two number
+ * @a: number
+ * @b: number
+ *
+ * Return: max of two number
+ */
+size_t _max(size_t a, size_t b)
+{
+	return (a > b ? a : b);
 }
