@@ -1,7 +1,7 @@
 #include "binary_trees.h"
 
 int is_avl_recursive(const binary_tree_t *tree, const binary_tree_t *min,
-                                         const binary_tree_t *max);
+			const binary_tree_t *max);
 
 /**
  * binary_tree_is_avl - checks if a binary tree is a valid AVL Tree
