@@ -1,80 +1,121 @@
 #include "binary_trees.h"
 
+avl_t *balance_subtree(avl_t *node);
+avl_t *rebalance(avl_t *node, avl_t **tree);
+
 /**
- * avl_insert - inserts a value in an AVL Tree
- * @tree: double pointer to root of AVL tree
- * @value: input value
- * Return: pointer to the created node, or NULL on failure
+ * balance_subtree - Balances a subtree rooted at 'node'
+ * @node: Pointer to the root of the subtree
+ * Return: Pointer to the new root of the balanced subtree
+ */
+avl_t *balance_subtree(avl_t *node)
+{
+	avl_t *new_root;
+
+	/* Left heavy case */
+	if (binary_tree_balance(node) > 1)
+	{
+		if (binary_tree_balance(node->left) < 0)
+			node->left = binary_tree_rotate_left(node->left);
+		new_root = binary_tree_rotate_right(node);
+	}
+	/* Right heavy case */
+	else if (binary_tree_balance(node) < -1)
+	{
+		if (binary_tree_balance(node->right) > 0)
+			node->right = binary_tree_rotate_right(node->right);
+		new_root = binary_tree_rotate_left(node);
+	}
+	/* Already balanced */
+	else
+		new_root = node;
+
+	return (new_root);
+}
+
+/**
+ * rebalance - Rebalances the tree after insertion
+ * @node: Pointer to the node where rebalancing is needed
+ * @tree: Double pointer to the root of the tree
+ * Return: Pointer to the input node
+ */
+avl_t *rebalance(avl_t *node, avl_t **tree)
+{
+	avl_t *tmp, *root;
+	int bal;
+
+	tmp = node;
+	while (tmp)
+	{
+		bal = binary_tree_balance(tmp);
+		/* Left heavy, rebalance to right */
+		if (bal == 2)
+		{
+			root = balance_subtree(tmp);
+			if (root)
+				*tree = root;
+		}
+		/* Right heavy, rebalance to left */
+		else if (bal == -2)
+		{
+			root = balance_subtree(tmp);
+			if (root)
+				*tree = root;
+		}
+		tmp = tmp->parent;
+	}
+	return (node);
+}
+
+/**
+ * avl_insert - Inserts a value in an AVL Tree
+ * @tree: Double pointer to the root of the tree
+ * @value: Input value
+ * Return: Pointer to the created node, or NULL on failure
  */
 avl_t *avl_insert(avl_t **tree, int value)
 {
-	avl_t *new_node = NULL;
+	avl_t *new_node, *node;
 
-	if (tree == NULL)
+	if (!tree)
 		return (NULL);
 
-	new_node = binary_tree_node(NULL, value);
-	if (new_node == NULL)
+	new_node = calloc(1, sizeof(avl_t));
+	if (!new_node)
 		return (NULL);
 
-	if (*tree == NULL)
+	new_node->n = value;
+
+	if (!*tree)
+		return (*tree = new_node);
+
+	node = *tree;
+	while (node)
 	{
-		*tree = new_node;
-		return (new_node);
+		/* Duplicate value, return NULL */
+		if (value == node->n)
+			return (free(new_node), NULL);
+
+		if (value < node->n)
+		{
+			if (node->left == NULL)
+			{
+				node->left = new_node;
+				new_node->parent = node;
+				return (rebalance(node->left, tree));
+			}
+			node = node->left;
+		}
+		else
+		{
+			if (node->right == NULL)
+			{
+				node->right = new_node;
+				new_node->parent = node;
+				return (rebalance(node->right, tree));
+			}
+			node = node->right;
+		}
 	}
-
-	*tree = avl_insert_recursive(*tree, value);
-	if (*tree == NULL)
-	{
-		free(new_node);
-		return (NULL);
-	}
-
-	return (new_node);
-}
-
-/**
- * avl_insert_recursive - recursively inserts a value in an AVL Tree
- * @root: pointer to root of AVL tree
- * @value: input value
- * Return: pointer to the created node, or NULL on failure
- */
-avl_t *avl_insert_recursive(avl_t *root, int value)
-{
-	if (root == NULL)
-		return (binary_tree_node(NULL, value));
-
-	if (value < root->n)
-		root->left = avl_insert_recursive(root->left, value);
-	else if (value > root->n)
-		root->right = avl_insert_recursive(root->right, value);
-	else
-		return (NULL);
-
-	return (avl_balance(root));
-}
-
-/**
- * avl_balance - Balance the AVL tree after insertion
- * @node: Pointer to the root of the subtree to be balanced
- * Return: Pointer to the new root of the balanced subtree
- */
-avl_t *avl_balance(avl_t *node)
-{
-        int balance_factor = binary_tree_balance(node);
-
-        if (balance_factor > 1) // Left heavy
-        {
-                if (binary_tree_balance(node->left) < 0) // Left-Right case
-                        node->left = binary_tree_rotate_left(node->left);
-                node = binary_tree_rotate_right(node); // Left-Left case
-        }
-        else if (balance_factor < -1) // Right heavy
-        {
-                if (binary_tree_balance(node->right) > 0) // Right-Left case
-                        node->right = binary_tree_rotate_right(node->right);
-                node = binary_tree_rotate_left(node); // Right-Right case
-        }
-
-        return (node);
+	return (free(new_node), NULL);
 }
